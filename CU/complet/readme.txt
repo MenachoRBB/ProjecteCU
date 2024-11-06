@@ -1,0 +1,4 @@
+En la protoboard:
+Las barras laterales van en el sentido de la linea de color, ahi conectamos positivos 5V al + y GND al negativo. Luego desde cada sensor, irá a la misma linea (positivo y negativo), el data lo enchufamos en el puerto que queramos de la placa para trabajar con el.
+
+En la parte central de la protoboard, todo va en el sentido contrario. El negativo deberá ir en el mismo que otro negativo de la placa base, y enchufarle en la misma linea la pata corta del led. En la linea de la pata larga se conectará una resistencia, que se alargará hasta la otra pata donde conectaremos a un puerto de la placa base, donde podremos modificar el estado del led. 
