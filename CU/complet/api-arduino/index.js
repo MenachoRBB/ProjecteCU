@@ -1,10 +1,14 @@
 // Importar dependencias
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors'); // Importar cors
 
 // Configuración del servidor
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
+
+// Middleware para habilitar CORS
+app.use(cors());
 
 // Middleware para procesar JSON
 app.use(express.json());
