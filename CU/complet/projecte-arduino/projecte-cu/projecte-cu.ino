@@ -13,7 +13,7 @@ const char* ssid = "TP-Link_6278";         // Nombre de tu red Wi-Fi
 const char* password = "71279664";         // Contraseña de tu red Wi-Fi
 
 // Dirección de la API
-const char* serverAddress = "192.168.0.100"; // Dirección IP del PC donde está la API
+const char* serverAddress = "192.168.0.101"; // Dirección IP del PC donde está la API
 int port = 5000;                             // Puerto donde está corriendo la API
 
 WiFiClient wifiClient;
@@ -22,7 +22,7 @@ HttpClient client(wifiClient, serverAddress, port);
 int estadoAnterior = LOW;        // Variable para guardar el estado anterior del sensor
 bool ledEncendido = false;       // Variable para el estado del LED
 unsigned long lastSendTime = 0;  // Tiempo del último envío
-const unsigned long sendInterval = 60000; // Intervalo de envío (60 segundos)
+const unsigned long sendInterval = 30000; // Intervalo de envío (60 segundos)
 
 bool datosEnviados = false; // Variable para enviar datos inmediatamente después de conectarse al Wi-Fi
 
