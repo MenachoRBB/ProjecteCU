@@ -1,12 +1,11 @@
-import React from 'react';
-import './App.css';
-import SensorData from './components/SensorData';
+import React from "react";
+import SensorCard from "./components/SensorCard";
+
 
 function App() {
   return (
-    <div className="App">
-      <h1>Monitor de Sensores</h1>
-      <SensorData />
+    <div>
+      <SensorCard />
     </div>
   );
 }
