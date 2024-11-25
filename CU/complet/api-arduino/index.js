@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware para habilitar CORS
 app.use(cors());
+app.use(cors({ origin: '*' }));
 
 // Middleware para procesar JSON
 app.use(express.json());
@@ -20,9 +21,11 @@ mongoose.connect('mongodb://localhost:27017/arduinoDB')
 
 // Importar rutas
 const sensorRoutes = require('./routes/sensorRoutes');
+const watchSensorRoutes = require('./routes/watchSensorRoutes');
 
 // Usar las rutas en la aplicación
 app.use(sensorRoutes);
+app.use(watchSensorRoutes);
 
 // Iniciar el servidor
 app.listen(PORT, () => {
