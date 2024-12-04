@@ -19,12 +19,14 @@ int port = 5000;                             // Puerto donde está corriendo la 
 WiFiClient wifiClient;
 HttpClient client(wifiClient, serverAddress, port);
 
-int estadoAnterior = LOW;        // Variable para guardar el estado anterior del sensor
+int estadoAnterior = LOW;        // Variable para guardar el estado anterior del sensor PIR
 bool ledEncendido = false;       // Variable para el estado del LED
-unsigned long lastSendTime = 0;  // Tiempo del último envío
-const unsigned long sendInterval = 60000; // Intervalo de envío (60 segundos)
 
-bool datosEnviados = false; // Variable para enviar datos inmediatamente después de conectarse al Wi-Fi
+// Tiempos para control de intervalos
+unsigned long lastDHTSendTime = 0; // Último tiempo de envío del DHT
+unsigned long lastPIRCheckTime = 0; // Último tiempo de lectura del PIR
+const unsigned long DHTInterval = 5000; // Intervalo de envío del DHT (5 segundos)
+const unsigned long PIRInterval = 1000; // Intervalo de lectura del PIR (1 segundo)
 
 void setup() {
   pinMode(PIR_PIN, INPUT);    // Configuramos el pin como entrada
@@ -43,29 +45,19 @@ void loop() {
     conectarWiFi();
   }
 
-  // Si aún no se han enviado datos después de conectarse al Wi-Fi, enviarlos
-  if (WiFi.status() == WL_CONNECTED && !datosEnviados) {
-    enviarDatosInmediatos();
-    datosEnviados = true; // Marcar que ya se enviaron los datos iniciales
+  // Leer y enviar datos del sensor DHT11 cada 5 segundos
+  if (millis() - lastDHTSendTime >= DHTInterval) {
+    if (WiFi.status() == WL_CONNECTED) {
+      enviarDatosDHT();
+    }
+    lastDHTSendTime = millis(); // Actualizar el tiempo del último envío
   }
 
-  // Verificar si ha pasado el intervalo para enviar datos
-  if (WiFi.status() == WL_CONNECTED && millis() - lastSendTime >= sendInterval) {
-    enviarDatos();
-    lastSendTime = millis(); // Actualizar el tiempo del último envío
+  // Leer el sensor PIR cada 1 segundo
+  if (millis() - lastPIRCheckTime >= PIRInterval) {
+    leerSensorPIR();
+    lastPIRCheckTime = millis(); // Actualizar el tiempo de la última lectura
   }
-
-  // Leer estado del sensor PIR
-  int estadoActual = digitalRead(PIR_PIN);
-
-  // Si hay movimiento detectado
-  if (estadoActual == HIGH && estadoAnterior == LOW) {
-    Serial.println("Movimiento detectado!");
-    ledEncendido = !ledEncendido; // Alternar el estado del LED
-    digitalWrite(LED_PIN, ledEncendido ? HIGH : LOW);
-  }
-
-  estadoAnterior = estadoActual; // Actualizar el estado anterior
 }
 
 void conectarWiFi() {
@@ -91,7 +83,7 @@ void conectarWiFi() {
   }
 }
 
-void enviarDatosInmediatos() {
+void enviarDatosDHT() {
   // Leer temperatura y humedad
   DHT.read11(DHT11_PIN);
   int temperatura = DHT.temperature;
@@ -101,7 +93,7 @@ void enviarDatosInmediatos() {
   String postData = "{\"temperatura\":" + String(temperatura) + ",\"humedad\":" + String(humedad) + "}";
 
   // Hacer la solicitud POST
-  Serial.println("Enviando datos iniciales a la API...");
+  Serial.println("Enviando datos del DHT11 a la API...");
   client.beginRequest();
   client.post("/api/sensores"); // Ruta de la API
   client.sendHeader("Content-Type", "application/json");
@@ -117,32 +109,18 @@ void enviarDatosInmediatos() {
   Serial.println(statusCode);
   Serial.print("Respuesta: ");
   Serial.println(response);
+  Serial.println("temperatura:" + String(temperatura) + "humedad:" + String(humedad));
 }
 
-void enviarDatos() {
-  // Leer temperatura y humedad
-  DHT.read11(DHT11_PIN);
-  int temperatura = DHT.temperature;
-  int humedad = DHT.humidity;
+void leerSensorPIR() {
+  int estadoActual = digitalRead(PIR_PIN);
 
-  // Crear el JSON para enviar
-  String postData = "{\"temperatura\":" + String(temperatura) + ",\"humedad\":" + String(humedad) + "}";
+  // Si hay movimiento detectado
+  if (estadoActual == HIGH && estadoAnterior == LOW) {
+    Serial.println("Movimiento detectado!");
+    ledEncendido = !ledEncendido; // Alternar el estado del LED
+    digitalWrite(LED_PIN, ledEncendido ? HIGH : LOW);
+  }
 
-  // Hacer la solicitud POST
-  Serial.println("Enviando datos periódicos a la API...");
-  client.beginRequest();
-  client.post("/api/sensores"); // Ruta de la API
-  client.sendHeader("Content-Type", "application/json");
-  client.sendHeader("Content-Length", postData.length());
-  client.beginBody();
-  client.print(postData);
-  client.endRequest();
-
-  // Leer la respuesta del servidor
-  int statusCode = client.responseStatusCode();
-  String response = client.responseBody();
-  Serial.print("Código de estado: ");
-  Serial.println(statusCode);
-  Serial.print("Respuesta: ");
-  Serial.println(response);
+  estadoAnterior = estadoActual; // Actualizar el estado anterior
 }

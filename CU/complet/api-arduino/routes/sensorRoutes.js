@@ -26,4 +26,16 @@ router.get('/api/sensores', async (req, res) => {
   }
 });
 
+// Ruta para obtener el último dato de sensores
+router.get('/api/sensores/ultimos', async (req, res) => {
+  try {
+    const lastData = await SensorData.findOne().sort({ _id: -1 }); // Ordenar por ID en lugar de timestamp
+    res.status(200).json(lastData || {});
+  } catch (error) {
+    console.error("Error al obtener el último dato", error);
+    res.status(500).send("Error al obtener el último dato");
+  }
+});
+
+
 module.exports = router;
