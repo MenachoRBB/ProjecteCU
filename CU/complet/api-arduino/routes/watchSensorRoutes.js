@@ -26,4 +26,15 @@ router.get('/api/sensores/ritmo-cardiaco', async (req, res) => {
   }
 });
 
+// Ruta para obtener el último dato de ritmo cardíaco
+router.get('/api/sensores/ritmo-cardiaco/ultimo', async (req, res) => {
+  try {
+    const lastData = await WatchSensorData.findOne().sort({ timestamp: -1 }); // Ordenar por timestamp descendente
+    res.status(200).json(lastData || {});
+  } catch (error) {
+    console.error("Error al obtener el último dato de ritmo cardíaco", error);
+    res.status(500).send("Error al obtener el último dato");
+  }
+});
+
 module.exports = router;
