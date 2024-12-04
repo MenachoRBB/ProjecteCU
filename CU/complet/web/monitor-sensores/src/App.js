@@ -44,8 +44,14 @@ const App = () => {
     return () => clearInterval(interval); // Limpia el intervalo al desmontar
   }, []); // Solo se ejecuta al montar el componente
 
+  // Determina si hay alerta
+  const isAlert = () => {
+    const { temperatura, humedad } = sensorData;
+    return temperatura > 40 || humedad > 60;
+  };
+
   return (
-    <div className="app">
+    <div className={`app ${isAlert() ? "alert" : ""}`}>
       <div className="container">
         <h1 className="title">Sensor de Salud</h1>
         <div className="cards">
